@@ -5,10 +5,32 @@ import (
 	"os"
 	"todo/cmd"
 	"todo/repository"
-	"todo/utils"
 )
 
 
+type TodoApp struct {
+	CategoryCommand cmd.CategoryCommand
+	TaskCommand cmd.TaskCommand
+	UserCommand cmd.UserCommand
+}
+
+func NewTodoApp(
+	categoryCommand cmd.CategoryCommand,
+	taskCommand cmd.TaskCommand,
+	userCommand cmd.UserCommand,
+) TodoApp {
+	return TodoApp{
+		categoryCommand,
+		taskCommand,
+		userCommand,
+	}
+}
+
+var todoApp TodoApp = NewTodoApp(
+	cmd.NewCategoryCommand(repository.NewCategoryRepository("./data/categories.json")),
+	cmd.NewTaskCommand(repository.NewTaskRepository("./data/tasks.json")),
+	cmd.NewUserCommand(repository.NewUserRepository("./data/users.json")),
+)
 
 func Runner() {
 	var option int
@@ -24,12 +46,12 @@ func Runner() {
 	fmt.Println("6. Create Task")
 	fmt.Println("7. Edit Task")
 	fmt.Println("8. Delete Task")
-	fmt.Println("10. List all Tasks")
 	fmt.Println("9. List User Tasks")
-	fmt.Println("10. Change Task Status")
+	fmt.Println("10. List all Tasks")
+	fmt.Println("11. Change Task Status")
 	// User Options
-	fmt.Println("11. Register User")
-	fmt.Println("12. Login User")
+	fmt.Println("12. Register User")
+	fmt.Println("13. Login User")
 	// Exit option
 	fmt.Println("0. Exit")
 
@@ -39,8 +61,7 @@ func Runner() {
 }
 
 func auth(next func()) {
-	auth := utils.Auth{}
-	isAuthenticated := auth.IsValidToken()
+	isAuthenticated := todoApp.UserCommand.IsAuthenticated()
 	if !isAuthenticated {
 		fmt.Println("You need to be logged in to use this option")
 		return
@@ -49,38 +70,36 @@ func auth(next func()) {
 }
 
 func handleOption(option int) {
-	categoriesPath := "./data/categories.json"
-	categoryRepo := repository.NewCategoryRepository(categoriesPath)
-	
-	cmd := cmd.NewCategoryCommand(categoryRepo)
 	switch(option) {
 	case 0:
 		fmt.Println("Goodbye")
 		os.Exit(0)
 	case 1:
-		auth(cmd.CreateCategory)
+		auth(todoApp.CategoryCommand.CreateCategory)
 	case 2:
-		auth(cmd.ListAllCategories)
+		auth(todoApp.CategoryCommand.ListAllCategories)
 	case 3:
-		auth(cmd.GetCategory)
+		auth(todoApp.CategoryCommand.GetCategory)
 	case 4:
-		auth(cmd.EditCategory)
+		auth(todoApp.CategoryCommand.EditCategory)
 	case 5:
-		auth(cmd.DeleteCategory)
-	// case 6:
-	// 	auth(cmd.CreateTask)
-	// case 7:
-	// 	auth(cmd.EditTask)
-	// case 8:
-	// 	auth(cmd.DeleteTask)
-	// case 9:
-	// 	auth(cmd.ListUserTasks)
-	// case 10:
-	// 	auth(cmd.ChangeTaskStatus)
-	// case 11:
-	// 	auth(cmd.RegisterUser)
-	// case 12:
-	// 	auth(cmd.LoginUser)
+		auth(todoApp.CategoryCommand.DeleteCategory)
+	case 6:
+		auth(todoApp.TaskCommand.CreateTask)
+	case 7:
+		auth(todoApp.TaskCommand.EditTask)
+	case 8:
+		auth(todoApp.TaskCommand.DeleteTask)
+	case 9:
+		auth(todoApp.TaskCommand.ListUserTasks)
+	case 10:
+		auth(todoApp.TaskCommand.ListAllTasks)
+	case 11:
+		auth(todoApp.TaskCommand.ChangeTaskStatus)
+	case 12:
+		todoApp.UserCommand.RegisterUser()
+	case 13:
+		todoApp.UserCommand.LoginUser()
 	default:
 		fmt.Println("Invalid Option")
 	}
