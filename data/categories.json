@@ -1,1 +1,4 @@
-[]
+[
+    { "Id": 15, "Title": "sample", "Color": "ategory" },
+    { "Id": 88, "Title": "sample category", "Color": "red" }
+]
