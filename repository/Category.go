@@ -4,66 +4,64 @@ import (
 	"encoding/json"
 	"errors"
 	"todo/model"
-	"todo/utils"
+	"todo/utilities"
 )
 
 type CategoryRepository struct {
 	filePath string
+	fileUtil utilities.File
 }
 
-var file utils.File = utils.File{}
 
 func NewCategoryRepository(path string) CategoryRepository {
-	return CategoryRepository{filePath: path}
+	return CategoryRepository{filePath: path, fileUtil: utilities.File{}}
 }
-func (repo CategoryRepository) CreateCategory(cat model.Category) error {
-	categoriesStr, readJSONFileErr := file.Read(repo.filePath)
+func (repo *CategoryRepository) CreateCategory(cat model.Category) error {
+	categoriesStr, readJSONFileErr := repo.fileUtil.Read(repo.filePath)
 	if(readJSONFileErr != nil) {
-		return errors.New("Error reading file")
+		return errors.New("error reading file")
 	}
 	var categories []model.Category
 	jsonUnmarshalErr := json.Unmarshal([]byte(categoriesStr), &categories)
 	if(jsonUnmarshalErr != nil) {
-		return errors.New("Error unmarshalling")
+		return errors.New("error unmarshalling")
 	}
 	categories = append(categories, cat)
 	categoriesJson, categoriesJSONErr := json.Marshal(categories)
 	if(categoriesJSONErr != nil) {
-		return errors.New("Error marshalling")
+		return errors.New("error marshalling")
 	}
-	saveJSONErr := file.Save(repo.filePath, string(categoriesJson))
+	saveJSONErr := repo.fileUtil.Save(repo.filePath, string(categoriesJson))
 	if(saveJSONErr != nil) {
-		return errors.New("Error saving file")
+		return errors.New("error saving file")
 	}
 	return nil
 }
-func (repo CategoryRepository) ListAllCategories() ([]model.Category, error) {
-	categoriesStr, readJSONFileErr := file.Read(repo.filePath)
+func (repo *CategoryRepository) ListAllCategories() ([]model.Category, error) {
+	categoriesStr, readJSONFileErr := repo.fileUtil.Read(repo.filePath)
 	if readJSONFileErr != nil {
-		return []model.Category{}, errors.New("Error reading file")
+		return []model.Category{}, errors.New("error reading file")
 	}
 	var categories []model.Category
 	jsonUnmarshalErr := json.Unmarshal([]byte(categoriesStr), &categories)
 	if jsonUnmarshalErr != nil {
-		return []model.Category{}, errors.New("Error reading file")
+		return []model.Category{}, errors.New("error reading file")
 	}
 	return categories, nil
 }
-func (repo CategoryRepository) GetCategory(id int) (model.Category, error) {
+func (repo *CategoryRepository) GetCategory(id int) (model.Category, error) {
 	categories, err := repo.ListAllCategories()
 	if err != nil {
 		return model.Category{}, err
 	}
-	findCategory := model.Category{}
 	for _, category := range categories {
 		if category.Id == id {
-			findCategory = category
-			return findCategory, nil
+			return category, nil
 		}
 	}
 	return model.Category{}, nil
 }
-func (repo CategoryRepository) EditCategory(cat model.Category) error {
+func (repo *CategoryRepository) EditCategory(cat model.Category) error {
 	categories, err := repo.ListAllCategories()
 	if err != nil {
 		return err
@@ -77,18 +75,18 @@ func (repo CategoryRepository) EditCategory(cat model.Category) error {
 			}
 			categoriesJson, categoriesJSONErr := json.Marshal(categories)
 			if(categoriesJSONErr != nil) {
-				return errors.New("Error marshalling")
+				return errors.New("error marshalling")
 			}
-			saveJSONErr := file.Save(repo.filePath, string(categoriesJson))
+			saveJSONErr := repo.fileUtil.Save(repo.filePath, string(categoriesJson))
 			if(saveJSONErr != nil) {
-				return errors.New("Error saving file")
+				return errors.New("error saving file")
 			}
 			return nil
 		}
 	}
-	return errors.New("Category not found")
+	return errors.New("category not found")
 }
-func (repo CategoryRepository) DeleteCategory(id int) error {
+func (repo *CategoryRepository) DeleteCategory(id int) error {
 	categories, err := repo.ListAllCategories()
 	if err != nil {
 		return err
@@ -98,14 +96,14 @@ func (repo CategoryRepository) DeleteCategory(id int) error {
 			categories = append(categories[:i], categories[i+1:]...)
 			categoriesJson, categoriesJSONErr := json.Marshal(categories)
 			if(categoriesJSONErr != nil) {
-				return errors.New("Error marshalling")
+				return errors.New("error marshalling")
 			}
-			saveJSONErr := file.Save(repo.filePath, string(categoriesJson))
+			saveJSONErr := repo.fileUtil.Save(repo.filePath, string(categoriesJson))
 			if(saveJSONErr != nil) {
-				return errors.New("Error saving file")
+				return errors.New("error saving file")
 			}
 			return nil
 		}
 	}
-	return errors.New("Category not found")
+	return errors.New("category not found")
 }
