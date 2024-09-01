@@ -71,7 +71,7 @@ func (repo *UserRepository) GetUserByEmailAndPassword(email string, password str
 			return user, nil
 		}
 	}
-	return model.User{}, nil
+	return model.User{}, errors.New("user not found")
 }
 func (repo *UserRepository) EditUser(cat model.User) error {
 	users, err := repo.ListAllUsers()

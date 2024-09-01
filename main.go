@@ -1,10 +1,13 @@
 package main
 
-import "fmt"
+import (
+	"fmt"
+	"todo/runner"
+)
 
 func main() {
 	fmt.Println("Welcome to the Todo App")
 	for {
-		Runner()
+		runner.Runner()
 	}
 }
