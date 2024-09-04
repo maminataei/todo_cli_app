@@ -75,25 +75,25 @@ func handleOption(option int) {
 		fmt.Println("Goodbye")
 		os.Exit(0)
 	case 1:
-		auth(todoApp.CategoryCommand.CreateCategory)
+		auth(todoApp.CategoryCommand.Create)
 	case 2:
-		auth(todoApp.CategoryCommand.ListAllCategories)
+		auth(todoApp.CategoryCommand.ListAll)
 	case 3:
-		auth(todoApp.CategoryCommand.GetCategory)
+		auth(todoApp.CategoryCommand.Get)
 	case 4:
-		auth(todoApp.CategoryCommand.EditCategory)
+		auth(todoApp.CategoryCommand.Edit)
 	case 5:
-		auth(todoApp.CategoryCommand.DeleteCategory)
+		auth(todoApp.CategoryCommand.Delete)
 	case 6:
-		auth(todoApp.TaskCommand.CreateTask)
+		auth(todoApp.TaskCommand.Create)
 	case 7:
-		auth(todoApp.TaskCommand.EditTask)
+		auth(todoApp.TaskCommand.Edit)
 	case 8:
-		auth(todoApp.TaskCommand.DeleteTask)
+		auth(todoApp.TaskCommand.Delete)
 	case 9:
-		auth(todoApp.TaskCommand.ListUserTasks)
+		auth(todoApp.TaskCommand.ListUser)
 	case 10:
-		auth(todoApp.TaskCommand.ListAllTasks)
+		auth(todoApp.TaskCommand.ListAll)
 	case 11:
 		auth(todoApp.TaskCommand.ChangeTaskStatus)
 	case 12:

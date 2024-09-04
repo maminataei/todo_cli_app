@@ -3,23 +3,19 @@ package cmd
 import (
 	"fmt"
 	"math/rand/v2"
+	"todo/interfaces"
 	"todo/model"
-	"todo/repository"
 	"todo/utilities"
 )
 
 type CategoryCommand struct {
-	repo repository.CategoryRepository
+	repo interfaces.Repo[model.Category]
 	ioUtil utilities.IO
 }
-
-
-
-func NewCategoryCommand(repo repository.CategoryRepository) CategoryCommand {
+func NewCategoryCommand(repo interfaces.Repo[model.Category]) CategoryCommand {
 	return CategoryCommand{repo: repo, ioUtil: utilities.NewIO()}
 }
-
-func (cmd *CategoryCommand) CreateCategory() {
+func (cmd *CategoryCommand) Create() {
 	var category model.Category = model.Category{}
 	fmt.Println("Create Category Command ...")
 	
@@ -40,22 +36,22 @@ func (cmd *CategoryCommand) CreateCategory() {
 	category.Color = categoryColor
 	category.Id = rand.IntN(100)
 
-	err := cmd.repo.CreateCategory(category)
+	err := cmd.repo.Create(category)
 	if err != nil {
 		fmt.Println(err)
 	} 
 	fmt.Println("Category created successfully")
 }
-func (cmd *CategoryCommand) ListAllCategories() {
+func (cmd *CategoryCommand) ListAll() {
 	fmt.Println("List All Categories Command ...")
-	categories, err := cmd.repo.ListAllCategories()
+	categories, err := cmd.repo.ListAll()
 	if err != nil {
 		fmt.Println(err)
 	}
 	fmt.Println("List of all categories : ")
 	fmt.Println(categories)
 }
-func (cmd *CategoryCommand) GetCategory() {
+func (cmd *CategoryCommand) Get() {
 	fmt.Println("Get Category Command ...")
 	fmt.Println("Please enter the id of the category : ")
 	categoryId, readCatIdErr := cmd.ioUtil.ReadNumber()
@@ -63,7 +59,7 @@ func (cmd *CategoryCommand) GetCategory() {
 		fmt.Println(readCatIdErr)
 		return
 	}
-	category, getCatErr := cmd.repo.GetCategory(categoryId)
+	category, getCatErr := cmd.repo.Get(categoryId)
 	if getCatErr != nil {
 		fmt.Println(getCatErr)
 		return
@@ -71,7 +67,7 @@ func (cmd *CategoryCommand) GetCategory() {
 	fmt.Println("Category details : ")
 	fmt.Println(category)
 }
-func (cmd *CategoryCommand) EditCategory() {
+func (cmd *CategoryCommand) Edit() {
 	fmt.Println("Edit Category Command ...")
 	category := model.Category{}
 	fmt.Println("Please enter the id of the category : ")
@@ -95,14 +91,14 @@ func (cmd *CategoryCommand) EditCategory() {
 		return
 	}
 	category.Color = categoryColor
-	err := cmd.repo.EditCategory(category)	
+	err := cmd.repo.Edit(category)	
 	if err != nil {
 		fmt.Println(err)
 		return
 	}
 	fmt.Println("Category edited successfully")
 }
-func (cmd *CategoryCommand) DeleteCategory() {
+func (cmd *CategoryCommand) Delete() {
 	fmt.Println("Delete Category Command ...")
 	fmt.Println("Please enter the id of the category : ")
 	categoryId, readCatIdErr := cmd.ioUtil.ReadNumber()
@@ -110,7 +106,7 @@ func (cmd *CategoryCommand) DeleteCategory() {
 		fmt.Println(readCatIdErr)
 		return
 	}
-	err := cmd.repo.DeleteCategory(categoryId)
+	err := cmd.repo.Delete(categoryId)
 	if err != nil {
 		fmt.Println(err)
 		return

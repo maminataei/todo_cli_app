@@ -3,6 +3,7 @@ package repository
 import (
 	"encoding/json"
 	"errors"
+	"todo/interfaces"
 	"todo/model"
 	"todo/utilities"
 )
@@ -12,10 +13,10 @@ type UserRepository struct {
 	FileUtil utilities.File
 	loggedIn bool
 }
-func NewUserRepository(path string) UserRepository {
-	return UserRepository{FilePath: path, FileUtil: utilities.File{}, loggedIn: false}
+func NewUserRepository(path string) interfaces.Repo[model.User] {
+	return &UserRepository{FilePath: path, FileUtil: utilities.File{}, loggedIn: false}
 }
-func (repo *UserRepository) CreateUser(user model.User) error {
+func (repo *UserRepository) Create(user model.User) error {
 	usersStr, readJSONFileErr := repo.FileUtil.Read(repo.FilePath)
 	if(readJSONFileErr != nil) {
 		return errors.New("error reading file")
@@ -36,7 +37,7 @@ func (repo *UserRepository) CreateUser(user model.User) error {
 	}
 	return nil
 }
-func (repo *UserRepository) ListAllUsers() ([]model.User, error) {
+func (repo *UserRepository) ListAll() ([]model.User, error) {
 	usersStr, readJSONFileErr := repo.FileUtil.Read(repo.FilePath)
 	if readJSONFileErr != nil {
 		return []model.User{}, errors.New("error reading file")
@@ -48,9 +49,8 @@ func (repo *UserRepository) ListAllUsers() ([]model.User, error) {
 	}
 	return users, nil
 }
-
-func (repo *UserRepository) GetUser(id int) (model.User, error) {
-	users, err := repo.ListAllUsers()
+func (repo *UserRepository) Get(id int) (model.User, error) {
+	users, err := repo.ListAll()
 	if err != nil {
 		return model.User{}, err
 	}
@@ -62,7 +62,7 @@ func (repo *UserRepository) GetUser(id int) (model.User, error) {
 	return model.User{}, nil
 }
 func (repo *UserRepository) GetUserByEmailAndPassword(email string, password string) (model.User, error) {
-	users, err := repo.ListAllUsers()
+	users, err := repo.ListAll()
 	if err != nil {
 		return model.User{}, err
 	}
@@ -73,8 +73,8 @@ func (repo *UserRepository) GetUserByEmailAndPassword(email string, password str
 	}
 	return model.User{}, errors.New("user not found")
 }
-func (repo *UserRepository) EditUser(cat model.User) error {
-	users, err := repo.ListAllUsers()
+func (repo *UserRepository) Edit(cat model.User) error {
+	users, err := repo.ListAll()
 	if err != nil {
 		return err
 	}
@@ -98,8 +98,8 @@ func (repo *UserRepository) EditUser(cat model.User) error {
 	}
 	return errors.New("user not found")
 }
-func (repo *UserRepository) DeleteUser(id int) error {
-	users, err := repo.ListAllUsers()
+func (repo *UserRepository) Delete(id int) error {
+	users, err := repo.ListAll()
 	if err != nil {
 		return err
 	}

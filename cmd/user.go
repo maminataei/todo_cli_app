@@ -3,15 +3,16 @@ package cmd
 import (
 	"fmt"
 	"math/rand/v2"
+	"todo/interfaces"
 	"todo/model"
 	"todo/repository"
 )
 
 type UserCommand struct {
-	repo repository.UserRepository
+	repo interfaces.Repo[model.User]
 }
 
-func NewUserCommand(repo repository.UserRepository) UserCommand {
+func NewUserCommand(repo interfaces.Repo[model.User]) UserCommand {
 	return UserCommand{repo}
 }
 
@@ -25,8 +26,7 @@ func (cmd *UserCommand) RegisterUser() {
 	fmt.Println("Please enter the user password : ")
 	fmt.Scanln(&Password)
 
-	err := cmd.repo.CreateUser(model.User{Id: rand.IntN(100), Email: Email, Password: Password})
-	if err != nil {
+	if err := cmd.repo.Create(model.User{Id: rand.IntN(100), Email: Email, Password: Password}); err != nil {
 		fmt.Println(err)
 		return
 	}
@@ -41,14 +41,22 @@ func (cmd *UserCommand) LoginUser() {
 
 	fmt.Println("Please enter the user password : ")
 	fmt.Scanln(&Password)
-
-	err := cmd.repo.LoginUser(Email, Password)
-	if err != nil {
+	userRepo, ok := cmd.repo.(*repository.UserRepository)
+    if !ok {
+        fmt.Println("cmd.repo is not a *repository.UserRepository")
+        return
+    }
+	if err := userRepo.LoginUser(Email, Password); err != nil {
 		fmt.Println(err)
 		return
 	}
 	fmt.Println("User logged in successfully")
 }
 func (cmd UserCommand) IsAuthenticated() bool {
-	return cmd.repo.IsLoggedIn()
+	userRepo, ok := cmd.repo.(*repository.UserRepository)
+    if !ok {
+        fmt.Println("cmd.repo is not a *repository.UserRepository")
+        return false
+    }
+	return userRepo.IsLoggedIn()
 }

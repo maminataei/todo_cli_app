@@ -3,6 +3,7 @@ package repository
 import (
 	"encoding/json"
 	"errors"
+	"todo/interfaces"
 	"todo/model"
 	"todo/utilities"
 )
@@ -13,10 +14,10 @@ type TaskRepository struct {
 }
 
 
-func NewTaskRepository(path string) TaskRepository {
-	return TaskRepository{filePath: path, fileUtil: utilities.File{}}
+func NewTaskRepository(path string) interfaces.Repo[model.Task] {
+	return &TaskRepository{filePath: path, fileUtil: utilities.File{}}
 }
-func (repo *TaskRepository) CreateTask(task model.Task) error {
+func (repo *TaskRepository) Create(task model.Task) error {
 	tasksStr, readJSONFileErr := repo.fileUtil.Read(repo.filePath)
 	if(readJSONFileErr != nil) {
 		return errors.New("error reading file")
@@ -37,7 +38,7 @@ func (repo *TaskRepository) CreateTask(task model.Task) error {
 	}
 	return nil
 }
-func (repo *TaskRepository) ListAllTasks() ([]model.Task, error) {
+func (repo *TaskRepository) ListAll() ([]model.Task, error) {
 	tasksStr, readJSONFileErr := repo.fileUtil.Read(repo.filePath)
 	if readJSONFileErr != nil {
 		return []model.Task{}, errors.New("error reading file")
@@ -49,8 +50,8 @@ func (repo *TaskRepository) ListAllTasks() ([]model.Task, error) {
 	}
 	return tasks, nil
 }
-func (repo *TaskRepository) GetTask(id int) (model.Task, error) {
-	tasks, err := repo.ListAllTasks()
+func (repo *TaskRepository) Get(id int) (model.Task, error) {
+	tasks, err := repo.ListAll()
 	if err != nil {
 		return model.Task{}, err
 	}
@@ -61,8 +62,8 @@ func (repo *TaskRepository) GetTask(id int) (model.Task, error) {
 	}
 	return model.Task{}, nil
 }
-func (repo *TaskRepository) EditTask(t model.Task) error {
-	tasks, err := repo.ListAllTasks()
+func (repo *TaskRepository) Edit(t model.Task) error {
+	tasks, err := repo.ListAll()
 	if err != nil {
 		return err
 	}
@@ -89,8 +90,8 @@ func (repo *TaskRepository) EditTask(t model.Task) error {
 	}
 	return errors.New("task not found")
 }
-func (repo *TaskRepository) DeleteTask(id int) error {
-	tasks, err := repo.ListAllTasks()
+func (repo *TaskRepository) Delete(id int) error {
+	tasks, err := repo.ListAll()
 	if err != nil {
 		return err
 	}
@@ -110,9 +111,8 @@ func (repo *TaskRepository) DeleteTask(id int) error {
 	}
 	return errors.New("task not found")
 }
-
 func (repo *TaskRepository) ListUserTasks(userId int) ([]model.Task, error) {
-	tasks, err := repo.ListAllTasks()
+	tasks, err := repo.ListAll()
 	if err != nil {
 		return []model.Task{}, err
 	}
@@ -124,9 +124,8 @@ func (repo *TaskRepository) ListUserTasks(userId int) ([]model.Task, error) {
 	}
 	return userTasks, nil
 }
-
 func (repo *TaskRepository) ChangeTaskStatus(taskId int, status bool) error {
-	tasks, err := repo.ListAllTasks()
+	tasks, err := repo.ListAll()
 	if err != nil {
 		return err
 	}

@@ -2,21 +2,22 @@ package cmd
 
 import (
 	"fmt"
+	"todo/interfaces"
 	"todo/model"
 	"todo/repository"
 	"todo/utilities"
 )
 
 type TaskCommand struct {
-	repo repository.TaskRepository
+	repo interfaces.Repo[model.Task]
 	ioUtil utilities.IO
 }
 
-func NewTaskCommand(repo repository.TaskRepository) TaskCommand {
+func NewTaskCommand(repo interfaces.Repo[model.Task]) TaskCommand {
 	return TaskCommand{repo: repo, ioUtil: utilities.NewIO()}
 }
 
-func (cmd *TaskCommand) CreateTask() {
+func (cmd *TaskCommand) Create() {
 	fmt.Println("Create Task Command ...")
 	var task model.Task
 	var err error
@@ -47,22 +48,22 @@ func (cmd *TaskCommand) CreateTask() {
 
 	task.IsDone = false
 
-	createTaskErr := cmd.repo.CreateTask(task)
-	if createTaskErr != nil {
+	if createTaskErr := cmd.repo.Create(task); createTaskErr != nil {
 		fmt.Println(createTaskErr)
+		return
 	}
 	fmt.Println("Task created successfully")
 }
-func (cmd *TaskCommand) ListAllTasks() {
+func (cmd *TaskCommand) ListAll() {
 	fmt.Println("List All Tasks Command ...")
-	tasks, err := cmd.repo.ListAllTasks()
+	tasks, err := cmd.repo.ListAll()
 	if err != nil {
 		fmt.Println(err)
 	}
 	fmt.Println("List of all tasks : ")
 	fmt.Println(tasks)
 }
-func (cmd *TaskCommand) GetTask() {
+func (cmd *TaskCommand) Get() {
 	fmt.Println("Get Task Command ...")
 	fmt.Println("Please enter the id of the task : ")
 	taskId, err := cmd.ioUtil.ReadNumber()
@@ -70,7 +71,7 @@ func (cmd *TaskCommand) GetTask() {
 		fmt.Println(err)
 		return
 	}
-	task, err := cmd.repo.GetTask(taskId)
+	task, err := cmd.repo.Get(taskId)
 	if err != nil {
 		fmt.Println(err)
 		return
@@ -78,7 +79,7 @@ func (cmd *TaskCommand) GetTask() {
 	fmt.Println("Task details : ")
 	fmt.Println(task)
 }
-func (cmd *TaskCommand) EditTask() {
+func (cmd *TaskCommand) Edit() {
 	fmt.Println("Edit Task Command ...")
 	task := model.Task{}
 	fmt.Println("Please enter the id of the task : ")
@@ -110,14 +111,13 @@ func (cmd *TaskCommand) EditTask() {
 		return
 	}
 
-	editTaskError := cmd.repo.EditTask(task)
-	if editTaskError != nil {
+	if editTaskError := cmd.repo.Edit(task); editTaskError != nil {
 		fmt.Println(editTaskError)
 		return
 	}
 	fmt.Println("Task edited successfully")
 }
-func (cmd *TaskCommand) DeleteTask() {
+func (cmd *TaskCommand) Delete() {
 	fmt.Println("Delete Task Command ...")
 	fmt.Println("Please enter the id of the task : ")
 	taskId, err := cmd.ioUtil.ReadNumber()
@@ -125,29 +125,32 @@ func (cmd *TaskCommand) DeleteTask() {
 		fmt.Println(err)
 		return
 	}
-
-	deleteTaskErr := cmd.repo.DeleteTask(taskId)
-	if deleteTaskErr != nil {
+	if deleteTaskErr := cmd.repo.Delete(taskId); deleteTaskErr != nil {
 		fmt.Println(deleteTaskErr)
 		return
 	}
 	fmt.Println("Task deleted successfully")
 }
-func (cmd *TaskCommand) ListUserTasks() {
-	fmt.Println("List User Tasks Command ...")
-	var userId int
-	fmt.Println("Please enter the user id : ")
-	userId, readUserIdErr := cmd.ioUtil.ReadNumber()
-	if readUserIdErr != nil {
-		fmt.Println("Please enter a valid user id")
-		return
-	}
-	tasks, err := cmd.repo.ListUserTasks(userId)
-	if err != nil {
-		fmt.Println(err)
-	}
-	fmt.Println("List of all tasks : ")
-	fmt.Println(tasks)
+func (cmd *TaskCommand) ListUser() {
+    fmt.Println("List User Tasks Command ...")
+    var userId int
+    fmt.Println("Please enter the user id : ")
+    userId, readUserIdErr := cmd.ioUtil.ReadNumber()
+    if readUserIdErr != nil {
+        fmt.Println("Please enter a valid user id")
+        return
+    }
+    taskRepo, ok := cmd.repo.(*repository.TaskRepository)
+    if !ok {
+        fmt.Println("cmd.repo is not a *repository.TaskRepository")
+        return
+    }
+    tasks, err := taskRepo.ListUserTasks(userId)
+    if err != nil {
+        fmt.Println(err)
+    }
+    fmt.Println("List of all tasks : ")
+    fmt.Println(tasks)
 }
 func (cmd *TaskCommand) ChangeTaskStatus() {
 	fmt.Println("Change Task Status Command ...")
@@ -166,14 +169,13 @@ func (cmd *TaskCommand) ChangeTaskStatus() {
 		return
 	}
 
-	task, findTaskErr := cmd.repo.GetTask(taskId)
+	task, findTaskErr := cmd.repo.Get(taskId)
 	if findTaskErr != nil {
 		fmt.Println(findTaskErr)
 		return
 	}
 	task.IsDone = isDone
-	editTaskErr := cmd.repo.EditTask(task)
-	if editTaskErr != nil {
+	if editTaskErr := cmd.repo.Edit(task); editTaskErr != nil {
 		fmt.Println(editTaskErr)
 		return
 	}
